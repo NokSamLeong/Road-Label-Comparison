@@ -4,8 +4,9 @@ first version 02/29/2020
 last update 03/02/2020
 
 Make sure JDK and Java are installed
-You can find it in the install file
-if error occures when you try to run the roadLabeling.jar, reinstall JDK12 (\install\jdk-12.0.2_windows-x64_bin) 
+Must be JDK 12 or above
+Must be Java 8 or above
+if error occures when you try to run the roadLabeling.jar, reinstall JDK
 
 program path: src\roadLabeling.jar
 
