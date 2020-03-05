@@ -1,32 +1,36 @@
 Road Label Comparison UserInterface 
 by Nok Sam Leong 
-first version 02/29/2020
-last update 03/02/2020
+First version 02/29/2020
+Last update 03/04/2020
 
 Make sure JDK and Java are installed
-Must be JDK 12 or above
-Must be Java 8 or above
-if error occures when you try to run the roadLabeling.jar, reinstall JDK
+You can find it in the install file
+If error occures when you try to run the roadLabeling.jar, reinstall JDK12 (\install\jdk-12.0.2_windows-x64_bin) 
 
-program path: src\roadLabeling.jar
+Program path: src\roadLabeling.jar
+Image path: pic
 
 The class files are hidden in the src file. 
-to review it, go to View(top bar) and check the hidden items.
+To review it, go to View(top bar) and check the hidden items.
 The program was specifically designed for the road label comparison task.
-and at most 4 different kind of labels for each key. 
+At least 1 and at most 4 different images for each key. 
 
 Instruction
+Non-labeled checkbox is considered to be an invalid selection
+Put images in the pic file. Recommand to put less than 200 images each time.
 Open button opens the first image in the current set in the default application.
 Maximum selection for each key is 2 labels.
-if None is selected, no labels will be marked even if they are selected.
+If None is selected, no labels will be marked even if they are selected.
 Do not need to delete the key string in the comment field. It is there for convenience.
-Do not hit next if it shows finish, otherwise it will insert faulty data into the file.
 Make sure to delete the images which you already give judgement to.
 The result is saved as txt file. data is seperated by tab.
 
 Update
-03/02/2019	corrected documentation
+03/02/2020	corrected documentation
 		added function
 			-open image
 			-stop writing in when finish
-		
+03/04/2020	next button is disabled when no valid selection.
+		non-labeled checkbox is considered to be aninvalid selection
+to-do		go back button
+		security
