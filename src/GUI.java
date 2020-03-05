@@ -12,14 +12,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JCheckBox;
+import java.util.*;
 
 public class GUI implements ActionListener{
     private Backend be = new Backend();
     private ArrayList<File> current = be.getNext();
-    private JCheckBox cb1 = new JCheckBox();
-    private JCheckBox cb2 = new JCheckBox();
-    private JCheckBox cb3 = new JCheckBox();
-    private JCheckBox cb4 = new JCheckBox();
+    private ArrayList<JCheckBox> checkboxList = new ArrayList<>(  
+                                                Arrays.asList(new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox()));
     private JCheckBox none = new JCheckBox("none");
     private JLabel key = new JLabel(be.getKey());
     private JTextField textField = new JTextField(be.getKey());
@@ -52,32 +51,21 @@ public class GUI implements ActionListener{
         frame.add(b2);
 
         //checkbox
-        cb1.setBounds(20,100,300,15);
-        cb1.addActionListener(this);
-        cb1.setActionCommand("0");
-        cb2.setBounds(340,100,300,15);
-        cb2.addActionListener(this);
-        cb2.setActionCommand("1");
-        cb3.setBounds(20,130,300,15);
-        cb3.addActionListener(this);
-        cb3.setActionCommand("2");
-        cb4.setBounds(340,130,300,15);
         ActionListener actionListener = new ActionHandler();
+        for(int i=0; i < checkboxList.size(); i++){
+            checkboxList.get(i).setBounds(20,i*30+100, 300, 15);
+            checkboxList.get(i).setActionCommand(i+"");
+            checkboxList.get(i).addActionListener(actionListener);
+            frame.add(checkboxList.get(i));
+        }
         changeLabel();
-        cb1.addActionListener(actionListener);
-        cb2.addActionListener(actionListener);
-        cb3.addActionListener(actionListener);
-        cb4.addActionListener(actionListener);
         none.addActionListener(actionListener);
-        none.setBounds(20,160,100,15);
-        frame.add(cb1);
-        frame.add(cb2);
-        frame.add(cb3);
-        frame.add(cb4);
+        none.setBounds(20,220,300,15);
+        none.setActionCommand("none");
         frame.add(none);
 
         //text field for comment
-        textField.setBounds(20, 190,screenSize.width/2-40,20);
+        textField.setBounds(20, 250,screenSize.width/2-40,20);
         frame.add(textField);
         //frame setting 
         frame.setSize(screenSize.width/2, screenSize.height/2);
@@ -87,10 +75,20 @@ public class GUI implements ActionListener{
     }
 
     private void changeLabel(){
-        if(current.size()>=1 && current.get(0)!=null) {      cb1.setText(current.get(0).getName().substring(0,28)); }
-        if(current.size()>=2 && current.get(1)!=null) {      cb2.setText(current.get(1).getName().substring(0,28)); }
-        if(current.size()>=3 && current.get(2)!=null) {      cb3.setText(current.get(2).getName().substring(0,28)); }
-        if(current.size()>=4 && current.get(3)!=null) {      cb4.setText(current.get(3).getName().substring(0,28)); }
+        for(int i=0; i<checkboxList.size() ; i++){
+            if(i < current.size())   checkboxList.get(i).setText(current.get(i).getName().substring(0,28));
+            else checkboxList.get(i).setText("");
+        }
+    }
+    private void errorFrame(String alert){
+                JFrame fail = new JFrame();
+                JLabel temp = new JLabel(alert);
+                temp.setBounds(20,20, 300,40);
+                fail.setSize(500,150);
+                fail.setLocation(100,100);
+                fail.setLayout(null);
+                fail.add(temp);
+                fail.setVisible(true);
     }
 
     /**
@@ -99,42 +97,40 @@ public class GUI implements ActionListener{
     public void actionPerformed(ActionEvent a){
         String action = a.getActionCommand();
         if(action.equals("next") && !be.isStopRecord()){
+            if(!be.isAnyChecked())  {// if no checkbox including none is checked
+                errorFrame("Please select none or at least one image");
+            }else{
             //saving choose to excel
-            try {
-                String comment = textField.getText();
-                be.writeIn(comment);
-            }catch (IOException e){}
-            //getting next set
-            cb1.setSelected(false);
-            cb2.setSelected(false);
-            cb3.setSelected(false);
-            cb4.setSelected(false);
-            none.setSelected(false);
-            current = be.getNext();
-            textField.setText(be.getKey());
-            if(current.isEmpty()){
-                key.setText("Finish");
-                cb1.setText("");
-                cb2.setText("");
-                cb3.setText("");
-                cb4.setText("");
-                textField.setText("finish");
+                  try {
+                      String comment = textField.getText();
+                      be.writeIn(comment);
+                  }catch (IOException e){}
+                  //reset checkboxs
+                  for(JCheckBox cb:checkboxList){
+                     cb.setSelected(false);
+                  }
+                  none.setSelected(false);
+                  //getting next set
+                  current = be.getNext();
+                  if(current.isEmpty()){
+                      key.setText("Finish");
+                      for(JCheckBox cb:checkboxList){
+                           cb.setText("");
+                      }
+                      textField.setText("finish");
+                  }
+                  else{
+                      key.setText(be.getKey());
+                      textField.setText(be.getKey());
+                      changeLabel();
+                  }
             }
-            else            key.setText(be.getKey());
-            changeLabel();
         }
         else if(action.equals("open")){
             try {
                 be.openImage();
             }catch (Exception e){
-                JFrame fail = new JFrame();
-                JLabel temp = new JLabel("Fail to open");
-                temp.setBounds(20,20, 100,20);
-                fail.setSize(200,100);
-                fail.setLocation(100,50);
-                fail.setLayout(null);
-                fail.add(temp);
-                fail.setVisible(true);
+                errorFrame("Fail to open");
             }
         }
     }
@@ -142,18 +138,15 @@ public class GUI implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent event) {
             JCheckBox checkbox = (JCheckBox) event.getSource();
-            if (checkbox.isSelected()) {
-                if (checkbox == cb1)   be.checkboxB[0] = true;
-                else if (checkbox == cb2) be.checkboxB[1] = true;
-                else if (checkbox == cb3) be.checkboxB[2] = true;
-                else if (checkbox == cb4) be.checkboxB[3] = true;
-                else{ be.checkboxB[4] = true; }
-            } else {
-                if (checkbox == cb1)  be.checkboxB[0] = false;
-                else if (checkbox == cb2) be.checkboxB[1] = false;
-                else if (checkbox == cb3) be.checkboxB[2] = false;
-                else if (checkbox == cb4) be.checkboxB[3] = false;
-                else{ be.checkboxB[4] = false; }
+            if (checkbox.isSelected()){
+               if(checkbox.getActionCommand().equals("none"))   be.isNone = true;
+               else if(Integer.parseInt(checkbox.getActionCommand()) < be.checkboxBoo.size())
+                  be.checkboxBoo.set(Integer.parseInt(checkbox.getActionCommand()), true);
+            }
+            else{
+               if(checkbox.getActionCommand().equals("none"))   be.isNone = false;
+               else if(Integer.parseInt(checkbox.getActionCommand()) < be.checkboxBoo.size())
+                  be.checkboxBoo.set(Integer.parseInt(checkbox.getActionCommand()), false);
             }
         }
     }

@@ -12,15 +12,16 @@ public class Backend {
     private String currentKey="";
     private LinkedList<File> theList = new LinkedList<>();
     private LinkedList<File> readFile = new LinkedList<>();
-    private ArrayList<File> current = new ArrayList<>(5);
+    private ArrayList<File> current = new ArrayList<>();
     private boolean stopRecord = false;
     /**checkbox array
       */
-    public boolean[] checkboxB = new boolean[5];
-
+    public ArrayList<Boolean> checkboxBoo = new ArrayList<>();
+    public boolean isNone = false;
     /**constructor, call method to read images
      */
     public Backend(){   run();  }
+
     private void run() {
         File targetFile = new File("..\\pic");
         for( File f: targetFile.listFiles()) {
@@ -33,18 +34,21 @@ public class Backend {
      * @return pic ArrayList of files that share the same key
      */
     public ArrayList<File> getNext(){
-        ArrayList<File> pic = new ArrayList<>();
+        isNone = false;
+        current = new ArrayList<>();
+        checkboxBoo = new ArrayList<>();
         if(!theList.isEmpty()) {
             currentKey = theList.getFirst().getName().substring(0, 16);
             while (!theList.isEmpty() && theList.peek().getName().substring(0, 16).equals(currentKey)) {
                 File temp = theList.remove();
-                pic.add(temp);
+                current.add(temp);
                 readFile.add(temp);
             }
         }else   stopRecord = true;
-        current = pic;
-        checkboxB = new boolean[5];
-        return pic;
+        for(File f: current){
+            checkboxBoo.add(false);
+        }
+        return current;
     }
 
     /**getter method for the stopRecord
@@ -60,6 +64,16 @@ public class Backend {
      */
     public String getKey(){  return currentKey; }
 
+    /**check if any check boxs is checked
+     * @return  result true if one or more check boxs are selected otherwise false
+     */
+    public boolean isAnyChecked(){
+        boolean result = isNone;
+        for(int i=0; i<checkboxBoo.size(); i++){
+            result = result || checkboxBoo.get(i);
+        }
+        return result;
+    }
     /** record the choice and comment , then write it into a .txt file using the tab delimited format
      *
      * @param comment comment about the choice or dataset
@@ -71,20 +85,18 @@ public class Backend {
         String result = currentKey;
         if(comment.equals(getKey()))    comment = "";
         File[] temp = new File[2];
-        if(!checkboxB[4]){
-            for(int i =0; i<5; i++){
-                if(temp[0] == null && checkboxB[i]) temp[0] = current.get(i);
-                else if(temp[1] == null && checkboxB[i]) temp[1] = current.get(i);
+        if(!isNone){     //if none is selected
+            for(int i =0; i<checkboxBoo.size(); i++){
+                if(temp[0] == null && checkboxBoo.get(i)) temp[0] = current.get(i);
+                else if(temp[1] == null && checkboxBoo.get(i)) temp[1] = current.get(i);
             }
-        }
-        if(checkboxB[4])   result+="\t"+"none"+"\t";
-        else{
             for(int i =0; i<2; i++){
                 String name ="";
                 if(temp[i] != null)  name = temp[i].getName().substring(0,28);
                 result += "\t"+ name;
             }
         }
+        else{   result+="\t"+"none"+"\t";}  //if none is not selected
         result +="\t"+comment;
         System.out.println(result);
         bwrite.write(result);
